@@ -251,40 +251,57 @@ Definir metas anuais da clínica,Estratégico`;
     setDropPosition(null);
   };
 
+  // Gera uma cor consistente baseada no nome da categoria
+  const generateCategoryColor = (category) => {
+    // Hash simples para garantir consistência
+    let hash = 0;
+    for (let i = 0; i < category.length; i++) {
+      const char = category.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    // Palette de cores predefinidas que funcionam bem juntas
+    const colorPalette = [
+      { bg: 'bg-blue-500', text: 'text-blue-600' },
+      { bg: 'bg-purple-500', text: 'text-purple-600' },
+      { bg: 'bg-green-500', text: 'text-green-600' },
+      { bg: 'bg-pink-500', text: 'text-pink-600' },
+      { bg: 'bg-orange-500', text: 'text-orange-600' },
+      { bg: 'bg-cyan-500', text: 'text-cyan-600' },
+      { bg: 'bg-red-500', text: 'text-red-600' },
+      { bg: 'bg-yellow-500', text: 'text-yellow-600' },
+      { bg: 'bg-indigo-500', text: 'text-indigo-600' },
+      { bg: 'bg-teal-500', text: 'text-teal-600' },
+      { bg: 'bg-rose-500', text: 'text-rose-600' },
+      { bg: 'bg-emerald-500', text: 'text-emerald-600' },
+      { bg: 'bg-violet-500', text: 'text-violet-600' },
+      { bg: 'bg-amber-500', text: 'text-amber-600' },
+      { bg: 'bg-lime-500', text: 'text-lime-600' },
+      { bg: 'bg-sky-500', text: 'text-sky-600' },
+      { bg: 'bg-fuchsia-500', text: 'text-fuchsia-600' },
+      { bg: 'bg-slate-500', text: 'text-slate-600' }
+    ];
+    
+    // Usa o hash para selecionar uma cor da palette
+    const colorIndex = Math.abs(hash) % colorPalette.length;
+    return colorPalette[colorIndex];
+  };
+
+  // Memoização das cores das categorias para garantir consistência
+  const getCategoryColors = (category) => {
+    if (!category) return { bg: 'bg-gray-500', text: 'text-gray-600' };
+    
+    // Gera cores baseadas no nome da categoria
+    return generateCategoryColor(category);
+  };
+
   const getCategoryColor = (category) => {
-    const colors = {
-      'Administrativo': 'bg-blue-500',
-      'RH': 'bg-purple-500',
-      'Financeiro': 'bg-green-500',
-      'Clínico': 'bg-pink-500',
-      'Marketing': 'bg-orange-500',
-      'Tecnologia': 'bg-cyan-500',
-      'Compliance': 'bg-red-500',
-      'Operacional': 'bg-yellow-500',
-      'Educação': 'bg-indigo-500',
-      'Pacientes': 'bg-teal-500',
-      'Emergência': 'bg-red-700',
-      'Estratégico': 'bg-purple-700'
-    };
-    return colors[category] || 'bg-gray-500';
+    return getCategoryColors(category).bg;
   };
 
   const getCategoryTextColor = (category) => {
-    const textColors = {
-      'Administrativo': 'text-blue-600',
-      'RH': 'text-purple-600',
-      'Financeiro': 'text-green-600',
-      'Clínico': 'text-pink-600',
-      'Marketing': 'text-orange-600',
-      'Tecnologia': 'text-cyan-600',
-      'Compliance': 'text-red-600',
-      'Operacional': 'text-yellow-600',
-      'Educação': 'text-indigo-600',
-      'Pacientes': 'text-teal-600',
-      'Emergência': 'text-red-700',
-      'Estratégico': 'text-purple-700'
-    };
-    return textColors[category] || 'text-gray-600';
+    return getCategoryColors(category).text;
   };
 
   return (
