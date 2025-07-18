@@ -404,15 +404,11 @@ Definir metas anuais da clínica,Estratégico`;
 
                   <div
                     data-task-card
-                    draggable={!editingTask && !editingComment}
-                    onDragStart={(e) => handleDragStart(e, task)}
                     onDragOver={handleDragOver}
                     onDragEnter={(e) => handleDragEnter(e, task)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, task)}
                     className={`relative flex items-center p-3 sm:p-4 border rounded-lg transition-all duration-200 ease-in-out touch-manipulation ${
-                      !editingTask && !editingComment ? 'cursor-move' : ''
-                    } ${
                       draggedTask?.id === task.id 
                         ? 'opacity-40 scale-95 shadow-xl rotate-1 z-50' 
                         : index < topTasksSeparator 
@@ -445,12 +441,39 @@ Definir metas anuais da clínica,Estratégico`;
                     ></div>
 
                     {/* Ranking */}
-                    <div className={`flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold mr-3 sm:mr-4 transition-all duration-200 ${
+                    <div className={`flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold mr-2 sm:mr-3 transition-all duration-200 ${
                       index < topTasksSeparator 
                         ? 'bg-red-100 text-red-700' 
                         : 'bg-gray-100 text-gray-600'
                     }`}>
                       {index + 1}
+                    </div>
+
+                    {/* Drag Handle */}
+                    <div 
+                      draggable={!editingTask && !editingComment}
+                      onDragStart={(e) => handleDragStart(e, task)}
+                      className={`flex-shrink-0 p-1 sm:p-2 mr-2 sm:mr-3 rounded-md transition-all duration-200 group ${
+                        !editingTask && !editingComment 
+                          ? 'cursor-grab hover:bg-gray-200 active:cursor-grabbing active:bg-gray-300' 
+                          : 'cursor-default opacity-50'
+                      }`}
+                      title="Arraste aqui para reordenar"
+                    >
+                      <svg 
+                        width="12" 
+                        height="16" 
+                        viewBox="0 0 12 16" 
+                        className={`${!editingTask && !editingComment ? 'text-gray-400 group-hover:text-gray-600' : 'text-gray-300'} transition-colors`}
+                        fill="currentColor"
+                      >
+                        <circle cx="2" cy="2" r="1.5"/>
+                        <circle cx="10" cy="2" r="1.5"/>
+                        <circle cx="2" cy="8" r="1.5"/>
+                        <circle cx="10" cy="8" r="1.5"/>
+                        <circle cx="2" cy="14" r="1.5"/>
+                        <circle cx="10" cy="14" r="1.5"/>
+                      </svg>
                     </div>
 
                     {/* Indicador de Categoria */}
