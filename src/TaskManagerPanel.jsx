@@ -11,9 +11,24 @@ const TaskManagerPanel = () => {
   const [editingComment, setEditingComment] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
   const [tempComment, setTempComment] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todas');
 
   // TOP 5 fixo - não pode ser alterado
   const topTasksSeparator = 5;
+
+  // Função para obter todas as categorias únicas
+  const getUniqueCategories = () => {
+    const categories = ['Todas', ...new Set(tasks.map(task => task.category).filter(Boolean))];
+    return categories;
+  };
+
+  // Função para filtrar tarefas por categoria
+  const getFilteredTasks = () => {
+    if (selectedCategory === 'Todas') {
+      return tasks;
+    }
+    return tasks.filter(task => task.category === selectedCategory);
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -377,10 +392,52 @@ Definir metas anuais da clínica,Estratégico`;
 
             {tasks.length > 0 && (
               <div className="text-green-600 text-xs mt-1">
-                ✅ {tasks.length} tarefas • 📱 Arraste com o dedo para reordenar • ✏️ Duplo toque no título para editar
+                ✅ {tasks.length} tarefas carregadas
+                {selectedCategory !== 'Todas' && (
+                  <span className="text-blue-600"> • 🔍 {getFilteredTasks().length} filtradas</span>
+                )}
+                <span className="text-gray-600"> • 📱 Arraste com o dedo para reordenar • ✏️ Duplo toque no título para editar</span>
               </div>
             )}
           </div>
+
+          {/* Command Bar - Filtros de Categoria */}
+          {tasks.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-sm font-medium text-gray-700 flex-shrink-0">Filtrar por categoria:</span>
+                <div className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  <div className="flex gap-2 pb-2 px-1" style={{ minWidth: 'max-content' }}>
+                    {getUniqueCategories().map((category) => {
+                      const isSelected = selectedCategory === category;
+                      const isAllTasks = category === 'Todas';
+                      const categoryColors = isAllTasks ? { bg: 'bg-gray-500', text: 'text-gray-600' } : getCategoryColors(category);
+                      
+                      return (
+                        <button
+                          key={category}
+                          onClick={() => setSelectedCategory(category)}
+                          className={`flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap border-2 ${
+                            isSelected
+                              ? `${categoryColors.bg} text-white shadow-md transform scale-105 border-transparent`
+                              : `bg-white ${categoryColors.text} hover:bg-gray-50 hover:shadow-sm border-gray-300 hover:border-gray-400`
+                          }`}
+                        >
+                          {isAllTasks ? '🔍 ' : '🏷️ '}{category}
+                          <span className="ml-1 text-xs opacity-75">
+                            ({isAllTasks ? tasks.length : tasks.filter(task => task.category === category).length})
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500">
+                💡 <strong>Dica:</strong> Role horizontalmente para ver mais categorias
+              </div>
+            </div>
+          )}
 
           {/* Lista de Tarefas */}
           {tasks.length === 0 ? (
@@ -391,7 +448,11 @@ Definir metas anuais da clínica,Estratégico`;
             </div>
           ) : (
             <div className="space-y-3 task-list">
-              {tasks.map((task, index) => (
+              {getFilteredTasks().map((task, index) => {
+                // Encontrar o índice real da tarefa na lista completa
+                const realIndex = tasks.findIndex(t => t.id === task.id);
+                
+                return (
                 <React.Fragment key={task.id}>
                   {/* Drop zone antes do card */}
                   {draggedTask && dropPosition === index && (
@@ -411,13 +472,13 @@ Definir metas anuais da clínica,Estratégico`;
                     className={`relative flex items-center p-3 sm:p-4 border rounded-lg transition-all duration-200 ease-in-out touch-manipulation ${
                       draggedTask?.id === task.id 
                         ? 'opacity-40 scale-95 shadow-xl rotate-1 z-50' 
-                        : index < topTasksSeparator 
+                        : realIndex < topTasksSeparator 
                         ? 'bg-gradient-to-r from-red-50 to-white hover:shadow-md border-red-200' 
                         : 'bg-white hover:shadow-md'
                     } ${
                       draggedOver === task.id 
                         ? 'border-blue-500 bg-blue-50 scale-105 shadow-lg' 
-                        : index < topTasksSeparator 
+                        : realIndex < topTasksSeparator 
                         ? 'border-red-200' 
                         : 'border-gray-200'
                     } ${
@@ -442,11 +503,11 @@ Definir metas anuais da clínica,Estratégico`;
 
                     {/* Ranking */}
                     <div className={`flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold mr-2 sm:mr-3 transition-all duration-200 ${
-                      index < topTasksSeparator 
+                      realIndex < topTasksSeparator 
                         ? 'bg-red-100 text-red-700' 
                         : 'bg-gray-100 text-gray-600'
                     }`}>
-                      {index + 1}
+                      {realIndex + 1}
                     </div>
 
                     {/* Drag Handle */}
@@ -507,7 +568,7 @@ Definir metas anuais da clínica,Estratégico`;
                         <div className={`text-xs sm:text-sm ${getCategoryTextColor(task.category)} font-medium`}>
                           {task.category}
                         </div>
-                        {index < topTasksSeparator && (
+                        {realIndex < topTasksSeparator && (
                           <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
                             TOP
                           </span>
@@ -539,7 +600,7 @@ Definir metas anuais da clínica,Estratégico`;
                   </div>
 
                   {/* Drop zone depois do último card */}
-                  {draggedTask && dropPosition === tasks.length && index === tasks.length - 1 && (
+                  {draggedTask && dropPosition === getFilteredTasks().length && index === getFilteredTasks().length - 1 && (
                     <div className="h-2 bg-blue-200 rounded-full border-2 border-dashed border-blue-400 opacity-75 animate-pulse mx-2">
                       <div className="text-center text-xs text-blue-600 font-medium">
                         ⬇️ Soltar aqui
@@ -548,7 +609,7 @@ Definir metas anuais da clínica,Estratégico`;
                   )}
 
                   {/* Separador Top Tasks FIXO */}
-                  {index === topTasksSeparator - 1 && (
+                  {realIndex === topTasksSeparator - 1 && selectedCategory === 'Todas' && (
                     <div className="flex items-center justify-center py-3 rounded-lg">
                       <div className="flex items-center gap-3 w-full">
                         <div className="flex-1 h-1 bg-red-500 rounded"></div>
@@ -561,7 +622,8 @@ Definir metas anuais da clínica,Estratégico`;
                     </div>
                   )}
                 </React.Fragment>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
